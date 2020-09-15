@@ -1,7 +1,7 @@
--module(erl_sshd).
+-module('lfe-sshd').
 -behaviour(gen_server).
 -define(SERVER, ?MODULE).
-
+-define(DEFAULT_PORT, 1450).
 %% ------------------------------------------------------------------
 %% API Function Exports
 %% ------------------------------------------------------------------
@@ -27,10 +27,10 @@ start_link() ->
 %% ------------------------------------------------------------------
 
 init(_) ->
-    Passwords = application:get_env(erl_sshd, passwords, []),
-    Port = application:get_env(erl_sshd, port, 11111),
-    MasterApp = application:get_env(erl_sshd, app, erl_sshd),
-    PrivDir = filename:join([code:priv_dir(MasterApp), "erl_sshd"]),
+    Passwords = application:get_env('lfe-sshd', passwords, []),
+    Port = application:get_env('lfe-sshd', port, ?DEFAULT_PORT),
+    MasterApp = application:get_env('lfe-sshd', app, 'lfe-sshd'),
+    PrivDir = filename:join([code:priv_dir(MasterApp), "lfe-sshd"]),
     gen_server:cast(self(), start),
     {ok, #{port => Port,
            priv_dir => PrivDir,
@@ -45,7 +45,8 @@ handle_cast(start, State = #{port := Port,
                              passwords := Passwords}) ->
     {ok, Pid} = ssh:daemon(Port, [{system_dir, PrivDir},
                                   {user_dir, PrivDir},
-                                  {user_passwords, Passwords}]),
+                                  {user_passwords, Passwords},
+                                  {shell, {lfe_shell, start, []}}]),
     link(Pid),
     {noreply, State#{pid => Pid}, hibernate};
 handle_cast(Msg, State) ->

@@ -1,0 +1,16 @@
+{application, 'lfe-sshd',
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  lfe,
+                  ssh
+                 ]},
+  {mod, { 'lfe-sshd-app', []}},
+  %% lfe> (lists:foldl (lambda (x acc) (+ acc x)) 0 "LFE REPL SSH Access")
+  %% 1450
+  {env, [{port, 1450}]}
+ ]}.
